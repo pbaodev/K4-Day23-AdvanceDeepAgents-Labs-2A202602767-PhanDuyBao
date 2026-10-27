@@ -107,3 +107,19 @@ Kết quả nằm ở `reports/survey-about-world-model.md` cùng `.sources.json
 - Mỗi lần chạy tốn token LLM và thời gian sandbox. `tokens` trong `meta.json` chỉ đếm tin nhắn của lead, chưa gồm subagent, nên chi phí thật cao hơn. `open_sandbox()` luôn dừng và xóa sandbox khi kết thúc, kể cả khi lỗi. Đừng bỏ qua nó.
 - **Không đưa bí mật vào sandbox.** Sandbox không ngăn được prompt injection hay việc đẩy dữ liệu ra mạng; một trang web độc hại có thể khiến agent chạy lệnh bên trong sandbox. Vì vậy mọi công cụ gọi mạng và mọi khóa ở lại phía host.
 - Nội dung lấy từ web là **dữ liệu không đáng tin**: agent không được làm theo chỉ dẫn nằm trong đó.
+
+## 8. Trạng thái bài làm và cách chạy lại
+
+Đã cài đặt: `check_citations.py`, `tools.py`, `agents.py`, `research.py` (không sửa `model.py`, `sandbox.py`, `finalize_citations.py`, `self_check.py`).
+
+```bash
+pip install -r requirements.txt pytest
+pytest -q tests                      # 44 test offline (không mạng, không LLM, không sandbox)
+python tools.py                      # thử 5 công cụ với dữ liệu thật (cần mạng)
+python research.py "survey about world model"   # cần .env: LAB_MODEL + khóa LLM, DAYTONA_API_KEY (hoặc SANDBOX=docker), EXA_API_KEY
+python self_check.py                 # kiểm tra trước khi nộp
+```
+
+Đọc `reports/`: mỗi chủ đề có `<slug>.md` (báo cáo, `## References` do `finalize_citations.py` sinh trong sandbox),
+`<slug>.sources.json` (nguồn đánh số khớp với `[n]`) và `<slug>.meta.json` (bằng chứng chấm: `subagent_calls`,
+`source_families`, `tokens`, `elapsed_s`). Báo cáo phải được sinh bởi `research.py`, không sửa tay.
